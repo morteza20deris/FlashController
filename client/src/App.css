@@ -1,0 +1,35 @@
+.App{
+	text-align: center;
+	background-color: lightgray;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+	-moz-appearance: textfield;
+}
+
+.App-header {
+	background-color: #282c34;
+	min-height: 10vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: calc(10px + 2vmin);
+	color: white;
+}
+.App-body {
+	
+	margin: auto;
+	width: 80vw;
+}
+.App input{
+	text-align: center;
+}
+
+.customYellow {filter: invert(79%) sepia(98%) saturate(945%) hue-rotate(1deg) brightness(105%) contrast(101%);}
