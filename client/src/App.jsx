@@ -34,6 +34,7 @@ function App() {
 	const [localPorts, setLocalPorts] = useState();
 	const [validated, setValidated] = useState(false);
 	const [remoteIP, setRemoteIP] = useState("");
+	const [remoteIPPort, setRemoteIPPort] = useState("");
 
 	useEffect(() => {
 		async function asyncLocalPorts() {
@@ -60,14 +61,15 @@ function App() {
 					18: greenCurrent,
 					20: greenDuration,
 					22: saveState ? 1 : 0,
-					microControllerPort:
-						method === "local" ? microControllerPort : remoteIP,
+					microControllerPort: microControllerPort,
 					method: method,
 					baudRate: baudRate,
 					byteSize: byteSize,
 					parity: parity,
 					stopBits: stopBits,
 					slave: slave,
+					remoteIP: remoteIP,
+					remoteIPPort: remoteIPPort,
 				},
 			})
 			.then((res) => {
@@ -176,6 +178,10 @@ function App() {
 										type="number"
 										min={0}
 										max={65535}
+										value={remoteIPPort}
+										onChange={(e) =>
+											setRemoteIPPort(e.target.value)
+										}
 									/>
 								</InputGroup>
 							)}
