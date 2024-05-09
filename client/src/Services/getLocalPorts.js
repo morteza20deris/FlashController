@@ -1,8 +1,8 @@
 import axios from "axios";
+import { LocalServerAddress } from "./constants";
 
 export default function getLocalPorts() {
-	return axios.get("http://localhost:3001/apiservices/usb").then((e) => {
-		// console.log(e.data);
+	return axios.get(`${LocalServerAddress}/apiservices/usb`).then((e) => {
 		return e.data;
 	});
 }

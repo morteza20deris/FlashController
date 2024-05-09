@@ -5,8 +5,10 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import FormGroup from "react-bootstrap/esm/FormGroup";
+import InputGroup from "react-bootstrap/InputGroup";
 import "./App.css";
 import getLocalPorts from "./Services/getLocalPorts";
+import { LocalServerAddress } from "./Services/constants";
 
 function App() {
 	const [redCurrent, setRedCurrent] = useState(500);
@@ -21,7 +23,7 @@ function App() {
 	const [triggerButton, setTriggerButton] = useState(true);
 	const [triggerSensor, setTriggerSensor] = useState(true);
 	const [saveState, setSaveState] = useState(true);
-	const [microControllerPort, setMicroControllerPort] = useState("com14");
+	const [microControllerPort, setMicroControllerPort] = useState("");
 	const [method, setMethod] = useState("local");
 	const [baudRate, setBaudRate] = useState(9600);
 	const [byteSize, setByteSize] = useState(8);
@@ -31,7 +33,7 @@ function App() {
 	const [waitForMicroResponse, setWaitForMicroResponse] = useState(false);
 	const [localPorts, setLocalPorts] = useState();
 	const [validated, setValidated] = useState(false);
-	const [remoteIP, setRemoteIP] = useState("192.168.1.16");
+	const [remoteIP, setRemoteIP] = useState("");
 
 	useEffect(() => {
 		async function asyncLocalPorts() {
@@ -44,7 +46,7 @@ function App() {
 		setWaitForMicroResponse(true);
 
 		await axios
-			.get(`http://localhost:3001/apiservices/${method}`, {
+			.get(`${LocalServerAddress}/apiServices/${method}`, {
 				params: {
 					0: triggerButton ? 1 : 0,
 					2: triggerSensor ? 1 : 0,
@@ -125,7 +127,15 @@ function App() {
 				<Form noValidate validated={validated} onSubmit={handleSubmit}>
 					<Row className="mb-3">
 						<FormGroup as={Col} className="col" md="4">
-							<h3>Connection Port</h3>
+							{method === "local" ? (
+								<h3 className="text-nowrap w-auto mw-100">
+									Connection Port
+								</h3>
+							) : (
+								<h3 className="text-nowrap w-auto mw-100">
+									Connection IP & Port
+								</h3>
+							)}
 							{method === "local" ? (
 								<Form.Select
 									className="prevent-validation"
@@ -143,20 +153,31 @@ function App() {
 									))}
 								</Form.Select>
 							) : (
-								<Form.Control
-									defaultValue={remoteIP}
-									onChange={(e) =>
-										setRemoteIP(e.target.value)
-									}
-									required
-									formNoValidate={true}
-									placeholder="Enter Controller IP Address"
-									type="text"
-									minLength="7"
-									maxLength="15"
-									size="15"
-									pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"
-								></Form.Control>
+								<InputGroup>
+									<Form.Control
+										defaultValue={remoteIP}
+										style={{ width: "50%" }}
+										onChange={(e) =>
+											setRemoteIP(e.target.value)
+										}
+										required
+										formNoValidate={true}
+										placeholder="Controller IP Address"
+										type="text"
+										minLength="7"
+										maxLength="15"
+										size="15"
+										pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"
+									/>
+
+									<Form.Control
+										required
+										placeholder="Port"
+										type="number"
+										min={0}
+										max={65535}
+									/>
+								</InputGroup>
 							)}
 						</FormGroup>
 						<FormGroup as={Col} md="4">
