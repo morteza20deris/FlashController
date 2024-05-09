@@ -58,7 +58,8 @@ function App() {
 					18: greenCurrent,
 					20: greenDuration,
 					22: saveState ? 1 : 0,
-					microControllerPort: microControllerPort,
+					microControllerPort:
+						method === "local" ? microControllerPort : remoteIP,
 					method: method,
 					baudRate: baudRate,
 					byteSize: byteSize,
