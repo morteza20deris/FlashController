@@ -33,8 +33,8 @@ function App() {
 	const [waitForMicroResponse, setWaitForMicroResponse] = useState(false);
 	const [localPorts, setLocalPorts] = useState();
 	const [validated, setValidated] = useState(false);
-	const [remoteIP, setRemoteIP] = useState("");
-	const [remoteIPPort, setRemoteIPPort] = useState("");
+	const [remoteIP, setRemoteIP] = useState("192.168.1.16");
+	const [remoteIPPort, setRemoteIPPort] = useState(5000);
 
 	useEffect(() => {
 		async function asyncLocalPorts() {
@@ -141,6 +141,7 @@ function App() {
 							{method === "local" ? (
 								<Form.Select
 									className="prevent-validation"
+									value={microControllerPort}
 									onChange={(e) =>
 										setMicroControllerPort(e.target.value)
 									}

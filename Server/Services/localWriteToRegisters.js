@@ -1,6 +1,5 @@
 module.exports = async (client, params) => {
 	client.setID(parseInt(params.slave));
-
 	return await client
 		.writeRegisters(0, [
 			parseInt(params["0"]),
