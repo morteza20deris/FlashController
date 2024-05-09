@@ -33,3 +33,19 @@ input[type=number] {
 }
 
 .customYellow {filter: invert(79%) sepia(98%) saturate(945%) hue-rotate(1deg) brightness(105%) contrast(101%);}
+
+.was-validated .prevent-validation.form-control:valid,
+.was-validated .prevent-validation.form-control.is-valid
+{
+	padding: 0.375rem 0.75rem;
+	border-color: #ced4da;
+	background-image: none !important
+}
+
+.was-validated .prevent-validation.form-select:valid,
+.was-validated .prevent-validation.form-select.is-valid{
+	padding: 0.375rem 0.75rem;
+	border-color: #ced4da;
+	--bs-form-select-bg-icon: none !important
+}
+

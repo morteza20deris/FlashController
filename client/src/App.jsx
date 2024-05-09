@@ -1,7 +1,12 @@
-import { useState } from "react";
-import "./App.css";
 import "axios";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import FormGroup from "react-bootstrap/esm/FormGroup";
+import "./App.css";
+import getLocalPorts from "./Services/getLocalPorts";
 
 function App() {
 	const [redCurrent, setRedCurrent] = useState(500);
@@ -17,53 +22,78 @@ function App() {
 	const [triggerSensor, setTriggerSensor] = useState(true);
 	const [saveState, setSaveState] = useState(true);
 	const [microControllerPort, setMicroControllerPort] = useState("com14");
-	const [method, setMethod] = useState("rtu");
+	const [method, setMethod] = useState("local");
 	const [baudRate, setBaudRate] = useState(9600);
 	const [byteSize, setByteSize] = useState(8);
+	const [slave, setSlave] = useState(1);
 	const [parity, setParity] = useState("N");
 	const [stopBits, setStopBits] = useState(1);
 	const [waitForMicroResponse, setWaitForMicroResponse] = useState(false);
+	const [localPorts, setLocalPorts] = useState();
+	const [validated, setValidated] = useState(false);
+	const [remoteIP, setRemoteIP] = useState("192.168.1.16");
+
+	useEffect(() => {
+		async function asyncLocalPorts() {
+			setLocalPorts(await getLocalPorts());
+		}
+		asyncLocalPorts();
+	}, []);
 
 	const buttonClickHandler = async () => {
 		setWaitForMicroResponse(true);
 
 		await axios
-			.get(
-				`http://localhost:3001/apiservices/${
-					method === "rtu" ? "local" : "remote"
-				}`,
-				{
-					params: {
-						0: triggerButton ? 1 : 0,
-						2: triggerSensor ? 1 : 0,
-						4: delayDuration,
-						6: redCurrent,
-						8: redDuration,
-						10: blueCurrent,
-						12: blueDuration,
-						14: whiteCurrent,
-						16: whiteDuration,
-						18: greenCurrent,
-						20: greenDuration,
-						22: saveState ? 1 : 0,
-						microControllerPort: microControllerPort,
-						method: method,
-						baudRate: baudRate,
-						byteSize: byteSize,
-						parity: parity,
-						stopBits: stopBits,
-					},
+			.get(`http://localhost:3001/apiservices/${method}`, {
+				params: {
+					0: triggerButton ? 1 : 0,
+					2: triggerSensor ? 1 : 0,
+					4: delayDuration,
+					6: redCurrent,
+					8: redDuration,
+					10: blueCurrent,
+					12: blueDuration,
+					14: whiteCurrent,
+					16: whiteDuration,
+					18: greenCurrent,
+					20: greenDuration,
+					22: saveState ? 1 : 0,
+					microControllerPort: microControllerPort,
+					method: method,
+					baudRate: baudRate,
+					byteSize: byteSize,
+					parity: parity,
+					stopBits: stopBits,
+					slave: slave,
+				},
+			})
+			.then((res) => {
+				// console.log(typeof res.data, res.data);
+				if (typeof res.data === "string") {
+					alert(res.data.replace(": File not found", "") + "\n\n");
+				} else {
+					alert(
+						`Action Successful \n Address: ${res.data.address} \n Length: ${res.data.length} \n\n`
+					);
 				}
-			)
-			.then((res) =>
-				alert(
-					res.data.includes("Error")
-						? "Connection Error"
-						: "Upload Was Successful"
-				)
-			)
+			})
 			.catch((err) => console.log(err))
 			.finally(() => setWaitForMicroResponse(false));
+	};
+
+	const handleSubmit = (event) => {
+		event.preventDefault();
+		const form = event.currentTarget;
+		if (form.checkValidity() === false) {
+			event.stopPropagation();
+			console.log("invalid");
+			alert("Some of you'r inputs are invalid");
+		} else if (form.checkValidity() === true) {
+			console.log("valid");
+			// buttonClickHandler();
+			buttonClickHandler();
+		}
+		setValidated(true);
 	};
 
 	return (
@@ -86,249 +116,349 @@ function App() {
 					alt="thunder"
 				/>
 			</header>
+
 			<div className="App-body">
 				<hr className="hr" />
 				<h2>Connection Settings</h2>
 				<hr className="hr" />
-				<div className="row">
-					<div className="col-md-4">
-						<h3>Connection Port</h3>
-						<input
-							className="form-control"
-							type="text"
-							value={microControllerPort}
-							onChange={(e) =>
-								setMicroControllerPort(e.target.value)
-							}
-							placeholder="Enter Connection port"
-						/>
-					</div>
-					<div className="col-md-4">
-						<h3>Method</h3>
-						<input
-							className="form-control"
-							type="text"
-							value={method}
-							onChange={(e) => setMethod(e.target.value)}
-							placeholder="Enter Connection Method"
-						/>
-					</div>
-					<div className="col-md-4">
-						<h3>Parity</h3>
-						<input
-							className="form-control"
-							type="text"
-							value={parity}
-							onChange={(e) => setParity(e.target.value)}
-							placeholder="Enter Connection Parity"
-						/>
-					</div>
-				</div>
-				<div className="row">
-					<div className="col-md-4">
-						<h3>BaudRate</h3>
-						<input
-							className="form-control"
-							type="number"
-							value={baudRate}
-							onChange={(e) => setBaudRate(e.target.value)}
-							placeholder="Enter Connection BaudRate"
-						/>
-					</div>
-					<div className="col-md-4">
-						<h3>ByteSize</h3>
-						<input
-							className="form-control"
-							type="number"
-							value={byteSize}
-							onChange={(e) => setByteSize(e.target.value)}
-							placeholder="Enter Connection ByteSize"
-						/>
-					</div>
-					<div className="col-md-4">
-						<h3>StopBits</h3>
-						<input
-							className="form-control"
-							type="number"
-							value={stopBits}
-							onChange={(e) => setStopBits(e.target.value)}
-							placeholder="Enter Connection StopBits"
-						/>
-					</div>
-				</div>
-				<hr className="hr" />
-				<h2>LED Settings</h2>
-				<hr className="hr" />
-				<form>
-					<div className="row my-3">
-						<div className="col">
+				<Form noValidate validated={validated} onSubmit={handleSubmit}>
+					<Row className="mb-3">
+						<FormGroup as={Col} className="col" md="4">
+							<h3>Connection Port</h3>
+							{method === "local" ? (
+								<Form.Select
+									className="prevent-validation"
+									onChange={(e) =>
+										setMicroControllerPort(e.target.value)
+									}
+								>
+									{localPorts?.map((item) => (
+										<option
+											key={item.portName}
+											value={item.portName}
+										>
+											{item.name}
+										</option>
+									))}
+								</Form.Select>
+							) : (
+								<Form.Control
+									defaultValue={remoteIP}
+									onChange={(e) =>
+										setRemoteIP(e.target.value)
+									}
+									required
+									formNoValidate={true}
+									placeholder="Enter Controller IP Address"
+									type="text"
+									minLength="7"
+									maxLength="15"
+									size="15"
+									pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"
+								></Form.Control>
+							)}
+						</FormGroup>
+						<FormGroup as={Col} md="4">
+							<h3>Method</h3>
+							<Form.Select
+								className="prevent-validation"
+								onChange={(e) => setMethod(e.target.value)}
+							>
+								<option value="local">Local</option>
+								<option value="remote">Remote</option>
+							</Form.Select>
+						</FormGroup>
+
+						<FormGroup as={Col} md="4">
+							<h3>Parity</h3>
+							<Form.Select
+								className="prevent-validation"
+								onChange={(e) => setParity(e.target.value)}
+							>
+								<option value="N">None</option>
+								<option value="E">Even</option>
+								<option value="O">Odd</option>
+								<option value="M">Mark</option>
+								<option value="S">Space</option>
+							</Form.Select>
+						</FormGroup>
+					</Row>
+
+					<Row className="mb-3">
+						<FormGroup as={Col} md="4">
+							<h3>BaudRate</h3>
+							<Form.Control
+								className="prevent-validation"
+								type="number"
+								defaultValue={baudRate}
+								onChange={(e) => setBaudRate(e.target.value)}
+								placeholder="Enter Connection BaudRate"
+							/>
+						</FormGroup>
+						<FormGroup as={Col} md="4">
+							<h3>ByteSize</h3>
+							<Form.Control
+								className="prevent-validation"
+								type="number"
+								defaultValue={byteSize}
+								onChange={(e) => setByteSize(e.target.value)}
+								placeholder="Enter Connection ByteSize"
+							/>
+						</FormGroup>
+						<FormGroup as={Col} md="4">
+							<h3>StopBits</h3>
+							<Form.Control
+								className="prevent-validation"
+								type="number"
+								defaultValue={stopBits}
+								onChange={(e) => setStopBits(e.target.value)}
+								placeholder="Enter Connection StopBits"
+							/>
+						</FormGroup>
+					</Row>
+					<h3>Slave ID</h3>
+					<Form.Control
+						className="prevent-validation"
+						type="number"
+						defaultValue={slave}
+						onChange={(e) => setSlave(e.target.value)}
+						placeholder="Enter Slave ID"
+					/>
+					<hr className="hr" />
+					<h2>LED Settings</h2>
+					<hr className="hr" />
+
+					<Row md="3">
+						<FormGroup as={Col} controlId="triggerValidation">
 							<h5 className="mx-2">Trigger Button</h5>
-							<input
-								type="checkbox"
+							<Form.Check
 								checked={triggerButton}
 								onChange={(e) =>
 									setTriggerButton(e.target.checked)
 								}
 							/>
-						</div>
+						</FormGroup>
 
-						<div className="col">
+						<FormGroup as={Col}>
 							<h5 className="mx-2">Trigger sensor</h5>
-							<input
-								type="checkbox"
+							<Form.Check
 								checked={triggerSensor}
 								onChange={(e) =>
 									setTriggerSensor(e.target.checked)
 								}
 							/>
-						</div>
+						</FormGroup>
 
-						<div className="col">
+						<FormGroup as={Col}>
 							<h5 className="mx-2">Save</h5>
-							<input
-								type="checkbox"
+							<Form.Check
 								checked={saveState}
 								onChange={(e) => setSaveState(e.target.checked)}
 							/>
-						</div>
-					</div>
-					<h3>Delay</h3>
-					<input
-						className="form-control"
-						type="number"
-						value={delayDuration}
-						min={0}
-						max={200}
-						onChange={(e) => setDelayDuration(e.target.value)}
-						placeholder="Delay Value"
-					/>
-					<div className="row">
-						<div className="col md-7">
-							<h3>Red LED Current</h3>
-							<input
-								className="form-control"
+						</FormGroup>
+					</Row>
+					<Row>
+						<FormGroup as={Col} controlId="delayValidation">
+							<h3>Delay</h3>
+							<Form.Control
+								isValid={validated}
+								required
 								type="number"
-								value={redCurrent}
+								defaultValue={delayDuration}
+								min={0}
+								max={200}
+								onChange={(e) =>
+									setDelayDuration(e.target.value)
+								}
+								placeholder="Delay Value"
+							/>
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 200
+							</Form.Control.Feedback>
+						</FormGroup>
+					</Row>
+
+					<Row>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="redCurrentValidation"
+						>
+							<h3>Red LED Current</h3>
+							<Form.Control
+								required
+								type="number"
+								defaultValue={redCurrent}
 								min={0}
 								max={2000}
 								onChange={(e) => setRedCurrent(e.target.value)}
 								placeholder="Red Led Current Value"
 							/>
-						</div>
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 2000
+							</Form.Control.Feedback>
+						</FormGroup>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="redDurationValidation"
+						>
 							<h3>Red LED Duration</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={500}
 								placeholder="Red Led Duration Amount"
-								value={redDuration}
+								defaultValue={redDuration}
 								onChange={(e) => setRedDuration(e.target.value)}
 							/>
-						</div>
-					</div>
-					<div className="row">
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 500
+							</Form.Control.Feedback>
+						</FormGroup>
+					</Row>
+					<Row>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="greenCurrentValidation"
+						>
 							<h3>Green LED Current</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={2000}
 								placeholder="Green Led Current Value"
-								value={greenCurrent}
+								defaultValue={greenCurrent}
 								onChange={(e) =>
 									setGreenCurrent(e.target.value)
 								}
 							/>
-						</div>
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 2000
+							</Form.Control.Feedback>
+						</FormGroup>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="greenDurationValidation"
+						>
 							<h3>Green LED Duration</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={500}
 								placeholder="Green Led Duration Amount"
-								value={greenDuration}
+								defaultValue={greenDuration}
 								onChange={(e) =>
 									setGreenDuration(e.target.value)
 								}
 							/>
-						</div>
-					</div>
-					<div className="row">
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 500
+							</Form.Control.Feedback>
+						</FormGroup>
+					</Row>
+					<Row>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="blueCurrentValidation"
+						>
 							<h3>Blue LED Current</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={2000}
 								placeholder="Blue Led Current Value"
-								value={blueCurrent}
+								defaultValue={blueCurrent}
 								onChange={(e) => setBlueCurrent(e.target.value)}
 							/>
-						</div>
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 2000
+							</Form.Control.Feedback>
+						</FormGroup>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="blueDurationValidation"
+						>
 							<h3>Blue LED Duration</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={500}
 								placeholder="Blue Led Duration Amount"
-								value={blueDuration}
+								defaultValue={blueDuration}
 								onChange={(e) =>
 									setBlueDuration(e.target.value)
 								}
 							/>
-						</div>
-					</div>
-					<div className="row">
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 500
+							</Form.Control.Feedback>
+						</FormGroup>
+					</Row>
+					<Row>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="whiteCurrentValidation"
+						>
 							<h3>White LED Current</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={2000}
 								placeholder="White Led Current Value"
-								value={whiteCurrent}
+								defaultValue={whiteCurrent}
 								onChange={(e) =>
 									setWhiteCurrent(e.target.value)
 								}
 							/>
-						</div>
-						<div className="col md-7">
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 2000
+							</Form.Control.Feedback>
+						</FormGroup>
+						<FormGroup
+							as={Col}
+							md="6"
+							controlId="whiteDurationValidation"
+						>
 							<h3>White LED Duration</h3>
-							<input
-								className="form-control"
+							<Form.Control
+								required
 								type="number"
 								min={0}
 								max={500}
 								placeholder="White Led Duration Amount"
-								value={whiteDuration}
+								defaultValue={whiteDuration}
 								onChange={(e) =>
 									setWhiteDuration(e.target.value)
 								}
 							/>
-						</div>
+							<Form.Control.Feedback type="invalid">
+								Please Enter a number Between 0 and 500
+							</Form.Control.Feedback>
+						</FormGroup>
+					</Row>
+					<div className="d-grid gap-2">
+						<button
+							className="btn btn-primary my-5"
+							disabled={waitForMicroResponse}
+							type="submit"
+							style={{ widows: "100%" }}
+						>
+							{waitForMicroResponse ? "Please Wait" : "Upload"}
+						</button>
 					</div>
-				</form>
-
-				<div class="d-grid gap-2">
-					<button
-						className="btn btn-primary my-5"
-						disabled={waitForMicroResponse}
-						type="button"
-						style={{ widows: "100%" }}
-						onClick={buttonClickHandler}
-					>
-						{waitForMicroResponse ? "Please Wait" : "Upload"}
-					</button>
-				</div>
+				</Form>
 			</div>
 		</div>
 	);
