@@ -81,6 +81,7 @@ function App() {
 						`Action Successful \n Address: ${res.data.address} \n Length: ${res.data.length} \n\n`
 					);
 				}
+				setWaitForMicroResponse(false);
 			})
 			.catch((err) => console.log(err))
 			.finally(() => setWaitForMicroResponse(false));
