@@ -1,7 +1,7 @@
 ::Set the application-specific string vars 
 SET AppDescription=FlashController
 SET IconName=thunder.ico
-SET Shortcut_Name=FlashController.url
+SET Shortcut_Name=Flash Controller.url
 SET URL_PATH=http://localhost:3000
 
 ::Set the common string vars 
