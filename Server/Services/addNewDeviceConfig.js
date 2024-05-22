@@ -20,13 +20,18 @@ module.exports = async (data) => {
 					  }
 					: item
 			);
-			fs.writeFile(dbPath, JSON.stringify(newDBData), "utf-8", (err) => {
-				if (err) {
-					console.log(err);
-					resolve(err);
+			fs.writeFile(
+				dbPath,
+				JSON.stringify(newDBData, null, 2),
+				"utf-8",
+				(err) => {
+					if (err) {
+						console.log(err);
+						resolve(err);
+					}
+					resolve(JSON.stringify(newDBData, null, 2));
 				}
-				resolve(JSON.stringify(newDBData));
-			});
+			);
 			console.log(newDBData);
 		});
 	});
