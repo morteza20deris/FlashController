@@ -1,3 +1,4 @@
+git pull origin main
 cd client
 start cmd /c npm start
 cd ..
