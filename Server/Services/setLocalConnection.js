@@ -1,5 +1,6 @@
 const ModbusRTU = require("modbus-serial");
 const client = new ModbusRTU();
+
 client.setTimeout(1000);
 
 module.exports = async (params, callback) => {
@@ -17,7 +18,6 @@ module.exports = async (params, callback) => {
 					if (e) {
 						console.log(e.toString());
 						resolve(e.toString());
-						client.close();
 					} else {
 						try {
 							// 	// resolve(await callback(client, params));
@@ -26,8 +26,6 @@ module.exports = async (params, callback) => {
 							console.log(error);
 							resolve(error.name);
 						}
-						// resolve("done");
-						client.close();
 					}
 				}
 			);

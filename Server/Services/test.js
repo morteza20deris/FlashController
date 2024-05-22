@@ -13,7 +13,7 @@ module.exports = async (parameters) => {
 				stopbits: parseInt(parameters.stopbits),
 			},
 			(e) => {
-				if (e?.toString().includes("Error")) {
+				if (e) {
 					console.log(e.toString());
 					resolve(e.toString());
 				} else {
@@ -21,33 +21,25 @@ module.exports = async (parameters) => {
 				}
 			}
 		);
-	});
+	}).catch(console.log);
 
 	function write() {
 		client.setID(parseInt(parameters.slave));
 		try {
-			client
-				.writeRegisters(0, [
-					parseInt(parameters["0"]),
-					parseInt(parameters["2"]),
-					parseInt(parameters["4"]),
-					parseInt(parameters["6"]),
-					parseInt(parameters["8"]),
-					parseInt(parameters["10"]),
-					parseInt(parameters["12"]),
-					parseInt(parameters["14"]),
-					parseInt(parameters["16"]),
-					parseInt(parameters["18"]),
-					parseInt(parameters["20"]),
-					parseInt(parameters["22"]),
-				])
-				.then((res) => {
+			return client.readHoldingRegisters(0, 12).then(
+				(res) => {
 					console.log(res);
 					client.close();
 					return res;
-				});
+				},
+				(err) => {
+					client.close();
+					return err.name;
+				}
+			);
 		} catch (error) {
 			console.log(error);
+			client.close();
 		}
 		return;
 	}
