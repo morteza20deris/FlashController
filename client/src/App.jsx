@@ -117,7 +117,10 @@ function App() {
 	};
 
 	return (
-		<div className="App">
+		<div
+			style={{ height: selectedDevice ? "100%" : "100vh" }}
+			className="App"
+		>
 			<header className="App-header">
 				<img
 					className="customYellow"
@@ -209,7 +212,11 @@ function App() {
 										</div>
 									))}
 								<Button
-									style={{ width: "100%" }}
+									style={{
+										width: selectedDevice ? "90%" : "100%",
+										marginBottom: "30px",
+										marginTop: "25px",
+									}}
 									className="mx-2"
 									onClick={() =>
 										setShowAddNewDeviceModal(true)

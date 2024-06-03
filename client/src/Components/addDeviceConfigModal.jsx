@@ -54,7 +54,7 @@ const addDeviceConfigModal = ({
 							}
 						}}
 					>
-						Save As New Config And Upload
+						Upload And Save As New Config
 					</Button>
 
 					<Button
@@ -75,7 +75,7 @@ const addDeviceConfigModal = ({
 							setShowAddDeviceConfigModal(false);
 						}}
 					>
-						Update Current Config And Upload
+						Upload And Update Current Config
 					</Button>
 				</Row>
 			</Modal.Footer>

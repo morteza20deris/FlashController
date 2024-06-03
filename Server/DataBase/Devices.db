@@ -1,31 +1,31 @@
 [
-	{
-		"deviceName": "config 1",
-		"configs": [
-			{
-				"name": "config 2",
-				"triggerButton": "1",
-				"triggerSensor": "1",
-				"delayDuration": "200",
-				"redCurrent": "500",
-				"redDuration": "100",
-				"blueCurrent": "500",
-				"blueDuration": "100",
-				"whiteCurrent": "500",
-				"whiteDuration": "100",
-				"greenCurrent": "500",
-				"greenDuration": "100",
-				"saveState": "1",
-				"microControllerPort": "COM17",
-				"method": "remoteTelnetFlashController",
-				"baudRate": "9600",
-				"byteSize": "8",
-				"parity": "N",
-				"stopBits": "1",
-				"slave": "1",
-				"remoteIP": "192.168.1.74",
-				"remoteIPPort": "4001"
-			}
-		]
-	}
+  {
+    "deviceName": "test",
+    "configs": [
+      {
+        "name": "config 2",
+        "triggerButton": "1",
+        "triggerSensor": "1",
+        "delayDuration": "200",
+        "redCurrent": "500",
+        "redDuration": "100",
+        "blueCurrent": "500",
+        "blueDuration": "100",
+        "whiteCurrent": "500",
+        "whiteDuration": "100",
+        "greenCurrent": "500",
+        "greenDuration": "100",
+        "saveState": "1",
+        "microControllerPort": "COM17",
+        "method": "remoteTelnetFlashController",
+        "baudRate": "9600",
+        "byteSize": "8",
+        "parity": "N",
+        "stopBits": "1",
+        "slave": "1",
+        "remoteIP": "192.168.1.74",
+        "remoteIPPort": "4001"
+      }
+    ]
+  }
 ]
