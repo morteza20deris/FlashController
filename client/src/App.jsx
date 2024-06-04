@@ -194,7 +194,7 @@ function App() {
 												onClick={async () => {
 													setDevicesFromDB(
 														await removeDeviceFromDB(
-															selectedDevice
+															device
 														)
 													);
 												}}
