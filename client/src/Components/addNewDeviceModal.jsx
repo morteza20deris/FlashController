@@ -39,6 +39,7 @@ function addNewDeviceModal({
 							type="text"
 							placeholder="Enter Device Name"
 							minLength="1"
+							maxLength={16}
 							required
 							value={newDeviceName}
 							isInvalid={!newDeviceName.length}

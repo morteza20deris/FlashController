@@ -166,37 +166,616 @@ function App() {
 				<Form noValidate validated={validated} onSubmit={handleSubmit}>
 					<Row>
 						<FormGroup as={Col} md={selectedDevice ? "2" : ""}>
-							<Row>
-								<h3>Devices</h3>
-								{devicesFromDB?.length > 0 &&
-									devicesFromDB?.map((device, index) => (
-										<div
-											className="my-2"
-											key={device.deviceName}
+							<h3>Devices</h3>
+							{devicesFromDB?.length > 0 &&
+								devicesFromDB?.map((device, index) => (
+									<div
+										className="my-2"
+										key={device.deviceName}
+									>
+										<ButtonGroup style={{ width: "100%" }}>
+											<Button
+												variant="secondary"
+												style={{
+													width: "80%",
+													whiteSpace: "nowrap",
+													overflow: "hidden",
+												}}
+												onClick={(e) => {
+													setSelectedDevice(device);
+													setSelectedDeviceIndex(
+														index
+													);
+												}}
+											>
+												{`Edit ${device.deviceName}`}
+											</Button>
+											<Button
+												onClick={async () => {
+													setDevicesFromDB(
+														await removeDeviceFromDB(
+															selectedDevice
+														)
+													);
+												}}
+												variant="secondary"
+											>
+												<img
+													src={trashIcon}
+													alt="delete"
+												/>
+											</Button>
+										</ButtonGroup>
+									</div>
+								))}
+							<Button
+								style={{
+									width: selectedDevice ? "90%" : "100%",
+									marginBottom: "30px",
+									marginTop: "25px",
+								}}
+								className="mx-2"
+								onClick={() => setShowAddNewDeviceModal(true)}
+							>
+								Add New Device
+							</Button>
+						</FormGroup>
+						{selectedDevice && (
+							<FormGroup as={Col} md="8">
+								<Row className="mb-3">
+									<h3>Config Name</h3>
+									<Form.Control
+										required
+										className="prevent-validation"
+										type="text"
+										maxLength="16"
+										value={configName}
+										onChange={(e) =>
+											setConfigName(e.target.value)
+										}
+										placeholder="Enter Config Name"
+									/>
+									<Form.Control.Feedback type="invalid">
+										Config Name is Necessary
+									</Form.Control.Feedback>
+									<FormGroup
+										as={Col}
+										md={
+											method === "localFlashController"
+												? 4
+												: ""
+										}
+									>
+										{method === "localFlashController" ? (
+											<h3 className="text-wrap w-auto mw-100">
+												Port
+											</h3>
+										) : (
+											<h3 className="text-nowrap w-auto mw-100">
+												Connection IP & Port
+											</h3>
+										)}
+										{method === "localFlashController" ? (
+											<Form.Select
+												className="prevent-validation"
+												value={
+													microControllerPort ||
+													localPorts[0]
+												}
+												onChange={(e) =>
+													setMicroControllerPort(
+														e.target.value
+													)
+												}
+											>
+												{localPorts?.map((item) => (
+													<option
+														key={item.portName}
+														value={item.portName}
+													>
+														{item.name}
+													</option>
+												))}
+											</Form.Select>
+										) : (
+											<InputGroup>
+												<Form.Control
+													value={remoteIP}
+													style={{
+														width: "60%",
+													}}
+													onChange={(e) =>
+														setRemoteIP(
+															e.target.value
+														)
+													}
+													required
+													formNoValidate={true}
+													placeholder="Controller IP Address"
+													type="text"
+													minLength="7"
+													maxLength="15"
+													size="15"
+													pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"
+												/>
+
+												<Form.Control
+													style={{ width: "40%" }}
+													required
+													placeholder="Port"
+													type="number"
+													min={0}
+													max={65535}
+													value={remoteIPPort}
+													onChange={(e) =>
+														setRemoteIPPort(
+															e.target.value
+														)
+													}
+												/>
+											</InputGroup>
+										)}
+									</FormGroup>
+									<FormGroup
+										as={Col}
+										md={
+											method === "localFlashController"
+												? 4
+												: ""
+										}
+									>
+										<h3>Method</h3>
+										<Form.Select
+											className="prevent-validation"
+											value={method}
+											onChange={(e) =>
+												setMethod(e.target.value)
+											}
 										>
-											<ButtonGroup>
+											<option value="localFlashController">
+												Serial Interface
+											</option>
+											<option value="remoteTCPFlashController">
+												TCP/IP
+											</option>
+											<option value="remoteTelnetFlashController">
+												Telnet
+											</option>
+										</Form.Select>
+									</FormGroup>
+									{method === "localFlashController" && (
+										<FormGroup as={Col} md="4">
+											<h3>Parity</h3>
+											<Form.Select
+												className="prevent-validation"
+												onChange={(e) =>
+													setParity(e.target.value)
+												}
+											>
+												<option value="N">None</option>
+												<option value="E">Even</option>
+												<option value="O">Odd</option>
+												<option value="M">Mark</option>
+												<option value="S">Space</option>
+											</Form.Select>
+										</FormGroup>
+									)}
+								</Row>
+
+								{method === "localFlashController" && (
+									<Row className="mb-3">
+										<FormGroup as={Col} md="4">
+											<h3>BaudRate</h3>
+											<Form.Control
+												className="prevent-validation"
+												type="number"
+												value={baudRate}
+												onChange={(e) =>
+													setBaudRate(e.target.value)
+												}
+												placeholder="Enter Connection BaudRate"
+											/>
+										</FormGroup>
+										<FormGroup as={Col} md="4">
+											<h3>ByteSize</h3>
+											<Form.Control
+												className="prevent-validation"
+												type="number"
+												value={byteSize}
+												onChange={(e) =>
+													setByteSize(e.target.value)
+												}
+												placeholder="Enter Connection ByteSize"
+											/>
+										</FormGroup>
+										<FormGroup as={Col} md="4">
+											<h3>StopBits</h3>
+											<Form.Control
+												className="prevent-validation"
+												type="number"
+												value={stopBits}
+												onChange={(e) =>
+													setStopBits(e.target.value)
+												}
+												placeholder="Enter Connection StopBits"
+											/>
+										</FormGroup>
+									</Row>
+								)}
+								<h3>Slave ID</h3>
+								<Form.Control
+									className="prevent-validation"
+									type="number"
+									value={slave}
+									onChange={(e) => setSlave(e.target.value)}
+									placeholder="Enter Slave ID"
+								/>
+								<hr className="hr" />
+								<h2>LED Settings</h2>
+								<hr className="hr" />
+
+								<Row md="3">
+									<FormGroup
+										as={Col}
+										controlId="triggerValidation"
+									>
+										<h5 className="mx-2">Trigger Button</h5>
+										<Form.Check
+											checked={triggerButton}
+											onChange={(e) =>
+												setTriggerButton(
+													e.target.checked
+												)
+											}
+										/>
+									</FormGroup>
+
+									<FormGroup as={Col}>
+										<h5 className="mx-2">Trigger sensor</h5>
+										<Form.Check
+											checked={triggerSensor}
+											onChange={(e) =>
+												setTriggerSensor(
+													e.target.checked
+												)
+											}
+										/>
+									</FormGroup>
+
+									<FormGroup as={Col}>
+										<h5 className="mx-2">Save</h5>
+										<Form.Check
+											checked={saveState}
+											onChange={(e) =>
+												setSaveState(e.target.checked)
+											}
+										/>
+									</FormGroup>
+								</Row>
+								<Row>
+									<FormGroup
+										as={Col}
+										controlId="delayValidation"
+									>
+										<h3>Delay</h3>
+										<Form.Control
+											isValid={validated}
+											required
+											type="number"
+											value={delayDuration}
+											min={0}
+											max={200}
+											onChange={(e) =>
+												setDelayDuration(e.target.value)
+											}
+											placeholder="Delay Value"
+										/>
+										<Form.Control.Feedback type="invalid">
+											Please Enter a number Between 0 and
+											200
+										</Form.Control.Feedback>
+									</FormGroup>
+								</Row>
+
+								<Row>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="redCurrentValidation"
+									>
+										<h3>Red LED Current</h3>
+										<Form.Control
+											required
+											type="number"
+											value={redCurrent}
+											min={0}
+											max={2000}
+											onChange={(e) =>
+												setRedCurrent(e.target.value)
+											}
+											placeholder="Red Led Current Value"
+										/>
+										<Form.Control.Feedback type="invalid">
+											Please Enter a number Between 0 and
+											2000
+										</Form.Control.Feedback>
+									</FormGroup>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="redDurationValidation"
+									>
+										<h3>Red LED Duration</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={redCurrent > 999 ? 100 : 200}
+											placeholder="Red Led Duration Amount"
+											value={redDuration}
+											onChange={(e) =>
+												setRedDuration(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											{`Please Enter a number Between 0 and ${
+												redCurrent > 999 ? 100 : 200
+											}`}
+										</Form.Control.Feedback>
+									</FormGroup>
+								</Row>
+								<Row>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="whiteCurrentValidation"
+									>
+										<h3>Green LED Current</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={2000}
+											placeholder="Green Led Current Value"
+											value={whiteCurrent}
+											onChange={(e) =>
+												setWhiteCurrent(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											Please Enter a number Between 0 and
+											2000
+										</Form.Control.Feedback>
+									</FormGroup>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="whiteDurationValidation"
+									>
+										<h3>Green LED Duration</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={whiteCurrent > 999 ? 100 : 200}
+											placeholder="Green Led Duration Amount"
+											value={whiteDuration}
+											onChange={(e) =>
+												setWhiteDuration(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											{`Please Enter a number Between 0 and ${
+												whiteCurrent > 999 ? 100 : 200
+											}`}
+										</Form.Control.Feedback>
+									</FormGroup>
+								</Row>
+								<Row>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="greenCurrentValidation"
+									>
+										<h3>Blue LED Current</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={2000}
+											placeholder="Blue Led Current Value"
+											value={greenCurrent}
+											onChange={(e) =>
+												setGreenCurrent(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											Please Enter a number Between 0 and
+											2000
+										</Form.Control.Feedback>
+									</FormGroup>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="greenDurationValidation"
+									>
+										<h3>Blue LED Duration</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={greenCurrent > 999 ? 100 : 200}
+											placeholder="Blue Led Duration Amount"
+											value={greenDuration}
+											onChange={(e) =>
+												setGreenDuration(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											{`Please Enter a number Between 0 and ${
+												greenCurrent > 999 ? 100 : 200
+											}`}
+										</Form.Control.Feedback>
+									</FormGroup>
+								</Row>
+								<Row>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="blueCurrentValidation"
+									>
+										<h3>White LED Current</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={2000}
+											placeholder="White Led Current Value"
+											value={blueCurrent}
+											onChange={(e) =>
+												setBlueCurrent(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											Please Enter a number Between 0 and
+											2000
+										</Form.Control.Feedback>
+									</FormGroup>
+									<FormGroup
+										as={Col}
+										md="6"
+										controlId="blueDurationValidation"
+									>
+										<h3>White LED Duration</h3>
+										<Form.Control
+											required
+											type="number"
+											min={0}
+											max={blueCurrent > 999 ? 100 : 200}
+											placeholder="White Led Duration Amount"
+											value={blueDuration}
+											onChange={(e) =>
+												setBlueDuration(e.target.value)
+											}
+										/>
+										<Form.Control.Feedback type="invalid">
+											{`Please Enter a number Between 0 and ${
+												blueCurrent > 999 ? 100 : 200
+											}`}
+										</Form.Control.Feedback>
+									</FormGroup>
+								</Row>
+
+								<div className="d-grid gap-2">
+									<button
+										className="btn btn-primary my-5"
+										disabled={waitForMicroResponse}
+										type="submit"
+										name="submit"
+										style={{ widows: "100%" }}
+									>
+										{waitForMicroResponse
+											? "Please Wait"
+											: "Upload"}
+									</button>
+								</div>
+							</FormGroup>
+						)}
+						{selectedDevice && (
+							<FormGroup as={Col} md="2">
+								<h3>Saves</h3>
+								{devicesFromDB?.length
+									? selectedDevice?.configs?.map((config) => (
+											<ButtonGroup
+												style={{ width: "100%" }}
+												key={config.name}
+												className="m-2 "
+											>
 												<Button
 													variant="secondary"
 													style={{
-														maxWidth: "110px",
-														whiteSpace: "nowrap",
+														width: "80%",
+														textWrap: "nowrap",
 														overflow: "hidden",
 													}}
-													onClick={(e) => {
-														setSelectedDevice(
-															device
+													onClick={() => {
+														setSelectedConfig(
+															config
 														);
-														setSelectedDeviceIndex(
-															index
+														setConfigName(
+															config.name
+														);
+														setBaudRate(
+															config.baudRate
+														);
+														setBlueCurrent(
+															config.blueCurrent
+														);
+														setBlueDuration(
+															config.blueDuration
+														);
+														setByteSize(
+															config.byteSize
+														);
+														setDelayDuration(
+															config.delayDuration
+														);
+														setGreenCurrent(
+															config.greenCurrent
+														);
+														setGreenDuration(
+															config.greenDuration
+														);
+														setMethod(
+															config.method
+														);
+														setMicroControllerPort(
+															config.microControllerPort
+														);
+														setParity(
+															config.parity
+														);
+														setRedCurrent(
+															config.redCurrent
+														);
+
+														setRedDuration(
+															config.redDuration
+														);
+														setRemoteIP(
+															config.remoteIP
+														);
+														setRemoteIPPort(
+															config.remoteIPPort
+														);
+														setSaveState(
+															config.saveState
+														);
+														setSlave(config.slave);
+														setStopBits(
+															config.stopBits
+														);
+														setTriggerButton(
+															config.triggerButton
+														);
+														setTriggerSensor(
+															config.triggerSensor
+														);
+														setWhiteCurrent(
+															config.whiteCurrent
+														);
+														setWhiteDuration(
+															config.whiteDuration
 														);
 													}}
 												>
-													{`Edit ${device.deviceName}`}
+													Edit {config.name}
 												</Button>
 												<Button
 													onClick={async () => {
 														setDevicesFromDB(
-															await removeDeviceFromDB(
+															await removeDeviceConfig(
+																config,
 																selectedDevice
 															)
 														);
@@ -209,663 +788,9 @@ function App() {
 													/>
 												</Button>
 											</ButtonGroup>
-										</div>
-									))}
-								<Button
-									style={{
-										width: selectedDevice ? "90%" : "100%",
-										marginBottom: "30px",
-										marginTop: "25px",
-									}}
-									className="mx-2"
-									onClick={() =>
-										setShowAddNewDeviceModal(true)
-									}
-								>
-									Add New Device
-								</Button>
-							</Row>
-						</FormGroup>
-						{selectedDevice && (
-							<>
-								<FormGroup as={Col} md="8">
-									<Row className="mb-3">
-										<h3>Config Name</h3>
-										<Form.Control
-											required
-											className="prevent-validation"
-											type="text"
-											value={configName}
-											onChange={(e) =>
-												setConfigName(e.target.value)
-											}
-											placeholder="Enter Config Name"
-										/>
-										<Form.Control.Feedback type="invalid">
-											Config Name is Necessary
-										</Form.Control.Feedback>
-										<FormGroup
-											as={Col}
-											md={
-												method ===
-												"localFlashController"
-													? 4
-													: ""
-											}
-										>
-											{method ===
-											"localFlashController" ? (
-												<h3 className="text-wrap w-auto mw-100">
-													Port
-												</h3>
-											) : (
-												<h3 className="text-nowrap w-auto mw-100">
-													Connection IP & Port
-												</h3>
-											)}
-											{method ===
-											"localFlashController" ? (
-												<Form.Select
-													className="prevent-validation"
-													value={
-														microControllerPort ||
-														localPorts[0]
-													}
-													onChange={(e) =>
-														setMicroControllerPort(
-															e.target.value
-														)
-													}
-												>
-													{localPorts?.map((item) => (
-														<option
-															key={item.portName}
-															value={
-																item.portName
-															}
-														>
-															{item.name}
-														</option>
-													))}
-												</Form.Select>
-											) : (
-												<InputGroup>
-													<Form.Control
-														value={remoteIP}
-														style={{
-															width: "60%",
-														}}
-														onChange={(e) =>
-															setRemoteIP(
-																e.target.value
-															)
-														}
-														required
-														formNoValidate={true}
-														placeholder="Controller IP Address"
-														type="text"
-														minLength="7"
-														maxLength="15"
-														size="15"
-														pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"
-													/>
-
-													<Form.Control
-														style={{ width: "40%" }}
-														required
-														placeholder="Port"
-														type="number"
-														min={0}
-														max={65535}
-														value={remoteIPPort}
-														onChange={(e) =>
-															setRemoteIPPort(
-																e.target.value
-															)
-														}
-													/>
-												</InputGroup>
-											)}
-										</FormGroup>
-										<FormGroup
-											as={Col}
-											md={
-												method ===
-												"localFlashController"
-													? 4
-													: ""
-											}
-										>
-											<h3>Method</h3>
-											<Form.Select
-												className="prevent-validation"
-												value={method}
-												onChange={(e) =>
-													setMethod(e.target.value)
-												}
-											>
-												<option value="localFlashController">
-													Serial Interface
-												</option>
-												<option value="remoteTCPFlashController">
-													TCP/IP
-												</option>
-												<option value="remoteTelnetFlashController">
-													Telnet
-												</option>
-											</Form.Select>
-										</FormGroup>
-										{method === "localFlashController" && (
-											<FormGroup as={Col} md="4">
-												<h3>Parity</h3>
-												<Form.Select
-													className="prevent-validation"
-													onChange={(e) =>
-														setParity(
-															e.target.value
-														)
-													}
-												>
-													<option value="N">
-														None
-													</option>
-													<option value="E">
-														Even
-													</option>
-													<option value="O">
-														Odd
-													</option>
-													<option value="M">
-														Mark
-													</option>
-													<option value="S">
-														Space
-													</option>
-												</Form.Select>
-											</FormGroup>
-										)}
-									</Row>
-
-									{method === "localFlashController" && (
-										<Row className="mb-3">
-											<FormGroup as={Col} md="4">
-												<h3>BaudRate</h3>
-												<Form.Control
-													className="prevent-validation"
-													type="number"
-													value={baudRate}
-													onChange={(e) =>
-														setBaudRate(
-															e.target.value
-														)
-													}
-													placeholder="Enter Connection BaudRate"
-												/>
-											</FormGroup>
-											<FormGroup as={Col} md="4">
-												<h3>ByteSize</h3>
-												<Form.Control
-													className="prevent-validation"
-													type="number"
-													value={byteSize}
-													onChange={(e) =>
-														setByteSize(
-															e.target.value
-														)
-													}
-													placeholder="Enter Connection ByteSize"
-												/>
-											</FormGroup>
-											<FormGroup as={Col} md="4">
-												<h3>StopBits</h3>
-												<Form.Control
-													className="prevent-validation"
-													type="number"
-													value={stopBits}
-													onChange={(e) =>
-														setStopBits(
-															e.target.value
-														)
-													}
-													placeholder="Enter Connection StopBits"
-												/>
-											</FormGroup>
-										</Row>
-									)}
-									<h3>Slave ID</h3>
-									<Form.Control
-										className="prevent-validation"
-										type="number"
-										value={slave}
-										onChange={(e) =>
-											setSlave(e.target.value)
-										}
-										placeholder="Enter Slave ID"
-									/>
-									<hr className="hr" />
-									<h2>LED Settings</h2>
-									<hr className="hr" />
-
-									<Row md="3">
-										<FormGroup
-											as={Col}
-											controlId="triggerValidation"
-										>
-											<h5 className="mx-2">
-												Trigger Button
-											</h5>
-											<Form.Check
-												checked={triggerButton}
-												onChange={(e) =>
-													setTriggerButton(
-														e.target.checked
-													)
-												}
-											/>
-										</FormGroup>
-
-										<FormGroup as={Col}>
-											<h5 className="mx-2">
-												Trigger sensor
-											</h5>
-											<Form.Check
-												checked={triggerSensor}
-												onChange={(e) =>
-													setTriggerSensor(
-														e.target.checked
-													)
-												}
-											/>
-										</FormGroup>
-
-										<FormGroup as={Col}>
-											<h5 className="mx-2">Save</h5>
-											<Form.Check
-												checked={saveState}
-												onChange={(e) =>
-													setSaveState(
-														e.target.checked
-													)
-												}
-											/>
-										</FormGroup>
-									</Row>
-									<Row>
-										<FormGroup
-											as={Col}
-											controlId="delayValidation"
-										>
-											<h3>Delay</h3>
-											<Form.Control
-												isValid={validated}
-												required
-												type="number"
-												value={delayDuration}
-												min={0}
-												max={200}
-												onChange={(e) =>
-													setDelayDuration(
-														e.target.value
-													)
-												}
-												placeholder="Delay Value"
-											/>
-											<Form.Control.Feedback type="invalid">
-												Please Enter a number Between 0
-												and 200
-											</Form.Control.Feedback>
-										</FormGroup>
-									</Row>
-
-									<Row>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="redCurrentValidation"
-										>
-											<h3>Red LED Current</h3>
-											<Form.Control
-												required
-												type="number"
-												value={redCurrent}
-												min={0}
-												max={2000}
-												onChange={(e) =>
-													setRedCurrent(
-														e.target.value
-													)
-												}
-												placeholder="Red Led Current Value"
-											/>
-											<Form.Control.Feedback type="invalid">
-												Please Enter a number Between 0
-												and 2000
-											</Form.Control.Feedback>
-										</FormGroup>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="redDurationValidation"
-										>
-											<h3>Red LED Duration</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={
-													redCurrent > 999 ? 100 : 200
-												}
-												placeholder="Red Led Duration Amount"
-												value={redDuration}
-												onChange={(e) =>
-													setRedDuration(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												{`Please Enter a number Between 0 and ${
-													redCurrent > 999 ? 100 : 200
-												}`}
-											</Form.Control.Feedback>
-										</FormGroup>
-									</Row>
-									<Row>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="greenCurrentValidation"
-										>
-											<h3>Green LED Current</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={2000}
-												placeholder="Green Led Current Value"
-												value={greenCurrent}
-												onChange={(e) =>
-													setGreenCurrent(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												Please Enter a number Between 0
-												and 2000
-											</Form.Control.Feedback>
-										</FormGroup>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="greenDurationValidation"
-										>
-											<h3>Green LED Duration</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={
-													greenCurrent > 999
-														? 100
-														: 200
-												}
-												placeholder="Green Led Duration Amount"
-												value={greenDuration}
-												onChange={(e) =>
-													setGreenDuration(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												{`Please Enter a number Between 0 and ${
-													greenCurrent > 999
-														? 100
-														: 200
-												}`}
-											</Form.Control.Feedback>
-										</FormGroup>
-									</Row>
-									<Row>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="blueCurrentValidation"
-										>
-											<h3>Blue LED Current</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={2000}
-												placeholder="Blue Led Current Value"
-												value={blueCurrent}
-												onChange={(e) =>
-													setBlueCurrent(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												Please Enter a number Between 0
-												and 2000
-											</Form.Control.Feedback>
-										</FormGroup>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="blueDurationValidation"
-										>
-											<h3>Blue LED Duration</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={
-													blueCurrent > 999
-														? 100
-														: 200
-												}
-												placeholder="Blue Led Duration Amount"
-												value={blueDuration}
-												onChange={(e) =>
-													setBlueDuration(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												{`Please Enter a number Between 0 and ${
-													blueCurrent > 999
-														? 100
-														: 200
-												}`}
-											</Form.Control.Feedback>
-										</FormGroup>
-									</Row>
-									<Row>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="whiteCurrentValidation"
-										>
-											<h3>White LED Current</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={2000}
-												placeholder="White Led Current Value"
-												value={whiteCurrent}
-												onChange={(e) =>
-													setWhiteCurrent(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												Please Enter a number Between 0
-												and 2000
-											</Form.Control.Feedback>
-										</FormGroup>
-										<FormGroup
-											as={Col}
-											md="6"
-											controlId="whiteDurationValidation"
-										>
-											<h3>White LED Duration</h3>
-											<Form.Control
-												required
-												type="number"
-												min={0}
-												max={
-													whiteCurrent > 999
-														? 100
-														: 200
-												}
-												placeholder="White Led Duration Amount"
-												value={whiteDuration}
-												onChange={(e) =>
-													setWhiteDuration(
-														e.target.value
-													)
-												}
-											/>
-											<Form.Control.Feedback type="invalid">
-												{`Please Enter a number Between 0 and ${
-													whiteCurrent > 999
-														? 100
-														: 200
-												}`}
-											</Form.Control.Feedback>
-										</FormGroup>
-									</Row>
-									<div className="d-grid gap-2">
-										<button
-											className="btn btn-primary my-5"
-											disabled={waitForMicroResponse}
-											type="submit"
-											name="submit"
-											style={{ widows: "100%" }}
-										>
-											{waitForMicroResponse
-												? "Please Wait"
-												: "Upload"}
-										</button>
-									</div>
-								</FormGroup>
-								<FormGroup as={Col} md="2">
-									<h3>Saves</h3>
-									{devicesFromDB?.length
-										? selectedDevice?.configs?.map(
-												(config) => (
-													<ButtonGroup
-														key={config.name}
-														className="m-2 "
-													>
-														<Button
-															variant="secondary"
-															style={{
-																width: "100%",
-															}}
-															onClick={() => {
-																setSelectedConfig(
-																	config
-																);
-																setConfigName(
-																	config.name
-																);
-																setBaudRate(
-																	config.baudRate
-																);
-																setBlueCurrent(
-																	config.blueCurrent
-																);
-																setBlueDuration(
-																	config.blueDuration
-																);
-																setByteSize(
-																	config.byteSize
-																);
-																setDelayDuration(
-																	config.delayDuration
-																);
-																setGreenCurrent(
-																	config.greenCurrent
-																);
-																setGreenDuration(
-																	config.greenDuration
-																);
-																setMethod(
-																	config.method
-																);
-																setMicroControllerPort(
-																	config.microControllerPort
-																);
-																setParity(
-																	config.parity
-																);
-																setRedCurrent(
-																	config.redCurrent
-																);
-
-																setRedDuration(
-																	config.redDuration
-																);
-																setRemoteIP(
-																	config.remoteIP
-																);
-																setRemoteIPPort(
-																	config.remoteIPPort
-																);
-																setSaveState(
-																	config.saveState
-																);
-																setSlave(
-																	config.slave
-																);
-																setStopBits(
-																	config.stopBits
-																);
-																setTriggerButton(
-																	config.triggerButton
-																);
-																setTriggerSensor(
-																	config.triggerSensor
-																);
-																setWhiteCurrent(
-																	config.whiteCurrent
-																);
-																setWhiteDuration(
-																	config.whiteDuration
-																);
-															}}
-														>
-															Edit {config.name}
-														</Button>
-														<Button
-															onClick={async () => {
-																setDevicesFromDB(
-																	await removeDeviceConfig(
-																		config,
-																		selectedDevice
-																	)
-																);
-															}}
-															variant="secondary"
-														>
-															<img
-																src={trashIcon}
-																alt="delete"
-															/>
-														</Button>
-													</ButtonGroup>
-												)
-										  )
-										: ""}
-								</FormGroup>
-							</>
+									  ))
+									: ""}
+							</FormGroup>
 						)}
 					</Row>
 				</Form>
