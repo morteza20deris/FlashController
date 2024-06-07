@@ -201,6 +201,9 @@ function App() {
 												variant="secondary"
 											>
 												<img
+													style={{
+														height: "100%",
+													}}
 													src={trashIcon}
 													alt="delete"
 												/>
@@ -210,11 +213,12 @@ function App() {
 								))}
 							<Button
 								style={{
-									width: selectedDevice ? "90%" : "100%",
-									marginBottom: "30px",
-									marginTop: "25px",
+									width: "100%",
+									textWrap: "nowrap",
+									fontSize: "100%",
+									overflow: "hidden",
 								}}
-								className="mx-2"
+								className="my-2"
 								onClick={() => setShowAddNewDeviceModal(true)}
 							>
 								Add New Device
@@ -783,6 +787,9 @@ function App() {
 													variant="secondary"
 												>
 													<img
+														style={{
+															height: "100%",
+														}}
 														src={trashIcon}
 														alt="delete"
 													/>

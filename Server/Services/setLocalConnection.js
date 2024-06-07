@@ -10,7 +10,7 @@ module.exports = async (params, callback) => {
 				params.microControllerPort,
 				{
 					baudRate: parseInt(params.baudRate),
-					parity: parseInt(params.parity),
+					parity: params.parity,
 					bytesize: parseInt(params.bytesize),
 					stopbits: parseInt(params.stopbits),
 				},
